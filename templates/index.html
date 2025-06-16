@@ -7,6 +7,37 @@
 </nav>
 {% endblock %}
 {% block content %}
+<div class="row mb-4 text-center">
+  <div class="col-md-4 mb-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="display-6">{{ counts.users }}</div>
+        <div>Toplam Kullanıcı</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="display-6">{{ counts.departments }}</div>
+        <div>Toplam Departman</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="display-6">{{ counts.stocks }}</div>
+        <div>Toplam Stok</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row mb-4">
+  <div class="col-md-6 mx-auto">
+    <canvas id="statsChart"></canvas>
+  </div>
+</div>
 <div class="row g-3">
   <div class="col-md-6 col-lg-4">
     <a href="{{ url_for('manage_users') }}" class="text-decoration-none">
@@ -49,4 +80,21 @@
     </a>
   </div>
 </div>
+<script>
+const ctx = document.getElementById('statsChart');
+if(ctx){
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Kullanıcı', 'Departman', 'Stok'],
+      datasets: [{
+        label: 'Adet',
+        data: [{{ counts.users }}, {{ counts.departments }}, {{ counts.stocks }}],
+        backgroundColor: 'rgba(13,110,253,0.7)'
+      }]
+    },
+    options: {scales:{y:{beginAtZero:true}}}
+  });
+}
+</script>
 {% endblock %}

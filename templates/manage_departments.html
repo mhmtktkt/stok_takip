@@ -14,7 +14,7 @@
     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addDept"><i class="bi bi-plus"></i> Ekle</button>
   </div>
   <div class="card-body p-0">
-    <table class="table table-striped mb-0">
+    <table class="table table-striped table-hover mb-0">
       <thead>
         <tr><th>ID</th><th>İsim</th><th class="text-end"></th></tr>
       </thead>
@@ -37,7 +37,7 @@
               </div>
               <form method="post" action="{{ url_for('edit_department', dept_id=d.id) }}">
                 <div class="modal-body">
-                  <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" value="{{ d.name }}" required></div>
+                  <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" value="{{ d.name }}" placeholder="Departman adı" autofocus required></div>
                 </div>
                 <div class="modal-footer"><button class="btn btn-primary" type="submit">Kaydet</button></div>
               </form>
@@ -58,7 +58,7 @@
       </div>
       <form method="post" action="{{ url_for('add_department') }}">
         <div class="modal-body">
-          <div class="mb-3"><label class="form-label">Departman Adı</label><input class="form-control" name="name" required></div>
+          <div class="mb-3"><label class="form-label">Departman Adı</label><input class="form-control" name="name" placeholder="Departman adı" autofocus required></div>
         </div>
         <div class="modal-footer"><button class="btn btn-primary" type="submit">Ekle</button></div>
       </form>
