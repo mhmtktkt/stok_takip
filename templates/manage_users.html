@@ -1,33 +1,110 @@
 {% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Kullanıcılar</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
-<h2>Kullanıcılar</h2>
-<table class="table">
-  <tr><th>ID</th><th>Kullanıcı Adı</th><th>Rol</th><th>Departman</th><th></th></tr>
-  {% for u in users %}
-  <tr>
-    <td>{{ u.id }}</td>
-    <td>{{ u.username }}</td>
-    <td>{{ u.role.name if u.role }}</td>
-    <td>{{ u.department.name if u.department }}</td>
-    <td><a class="btn btn-sm btn-danger" href="{{ url_for('delete_user', user_id=u.id) }}">Sil</a></td>
-  </tr>
-  {% endfor %}
-</table>
-<h3>Yeni Kullanıcı</h3>
-<form method="post" action="{{ url_for('add_user') }}">
-  <div class="mb-3"><input class="form-control" name="username" placeholder="Kullanıcı Adı"></div>
-  <div class="mb-3"><input class="form-control" type="password" name="password" placeholder="Şifre"></div>
-  <div class="mb-3">
-    <select class="form-select" name="role_id">
-      {% for r in roles %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
-    </select>
+<div class="card shadow-sm mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Kullanıcılar</span>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addUser"><i class="bi bi-plus"></i> Ekle</button>
   </div>
-  <div class="mb-3">
-    <select class="form-select" name="department_id">
-      <option value="">Seçiniz</option>
-      {% for d in departments %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}
-    </select>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Kullanıcı Adı</th>
+            <th>Rol</th>
+            <th>Departman</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.role.name if u.role }}</td>
+            <td>{{ u.department.name if u.department }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editUser{{u.id}}"><i class="bi bi-pencil"></i></button>
+              <a class="btn btn-sm btn-danger" onclick="return confirm('Silinsin mi?')" href="{{ url_for('delete_user', user_id=u.id) }}"><i class="bi bi-trash"></i></a>
+            </td>
+          </tr>
+          <div class="modal fade" id="editUser{{u.id}}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Kullanıcı Düzenle</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="{{ url_for('edit_user', user_id=u.id) }}">
+                  <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Kullanıcı Adı</label><input class="form-control" name="username" value="{{ u.username }}" required></div>
+                    <div class="mb-3"><label class="form-label">Şifre</label><input class="form-control" type="password" name="password"></div>
+                    <div class="mb-3">
+                      <label class="form-label">Rol</label>
+                      <select class="form-select" name="role_id">
+                        {% for r in roles %}<option value="{{ r.id }}" {% if u.role and r.id==u.role.id %}selected{% endif %}>{{ r.name }}</option>{% endfor %}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Departman</label>
+                      <select class="form-select" name="department_id">
+                        <option value="">Seçiniz</option>
+                        {% for d in departments %}<option value="{{ d.id }}" {% if u.department and d.id==u.department.id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-  <button class="btn btn-primary" type="submit">Ekle</button>
-</form>
+</div>
+<div class="modal fade" id="addUser" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Yeni Kullanıcı</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{{ url_for('add_user') }}">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Kullanıcı Adı</label><input class="form-control" name="username" required></div>
+          <div class="mb-3"><label class="form-label">Şifre</label><input class="form-control" type="password" name="password" required></div>
+          <div class="mb-3">
+            <label class="form-label">Rol</label>
+            <select class="form-select" name="role_id" required>
+              {% for r in roles %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Departman</label>
+            <select class="form-select" name="department_id">
+              <option value="">Seçiniz</option>
+              {% for d in departments %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit">Ekle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

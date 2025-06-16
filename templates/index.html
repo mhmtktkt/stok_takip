@@ -1,10 +1,52 @@
 {% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active">Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
-<h2>Hoşgeldiniz {{ current_user.username }}</h2>
-<ul>
-  <li><a href="{{ url_for('manage_users') }}">Kullanıcı Yönetimi</a></li>
-  <li><a href="{{ url_for('manage_departments') }}">Departman Yönetimi</a></li>
-  <li><a href="{{ url_for('manage_permissions') }}">Yetki Tanımlama</a></li>
-  <li><a href="{{ url_for('stok_kartlari') }}">Stok Kartları</a></li>
-</ul>
+<div class="row g-3">
+  <div class="col-md-6 col-lg-4">
+    <a href="{{ url_for('manage_users') }}" class="text-decoration-none">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-people display-5"></i>
+          <h5 class="card-title mt-2">Kullanıcı Yönetimi</h5>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-lg-4">
+    <a href="{{ url_for('manage_departments') }}" class="text-decoration-none">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-building display-5"></i>
+          <h5 class="card-title mt-2">Departman Yönetimi</h5>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-lg-4">
+    <a href="{{ url_for('manage_permissions') }}" class="text-decoration-none">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-shield-lock display-5"></i>
+          <h5 class="card-title mt-2">Yetki Tanımlama</h5>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-lg-4">
+    <a href="{{ url_for('stok_kartlari') }}" class="text-decoration-none">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <i class="bi bi-boxes display-5"></i>
+          <h5 class="card-title mt-2">Stok Kartları</h5>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
 {% endblock %}

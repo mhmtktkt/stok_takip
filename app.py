@@ -152,6 +152,19 @@ def add_user():
     db.session.commit()
     return redirect(url_for('manage_users'))
 
+@app.route('/management/users/edit/<int:user_id>', methods=['POST'])
+@login_required
+@permission_required('Kullanıcı Ekle')
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    user.username = request.form['username']
+    if request.form.get('password'):
+        user.set_password(request.form['password'])
+    user.role_id = request.form.get('role_id')
+    user.department_id = request.form.get('department_id')
+    db.session.commit()
+    return redirect(url_for('manage_users'))
+
 @app.route('/management/users/delete/<int:user_id>')
 @login_required
 @permission_required('Kullanıcı Ekle')
@@ -178,6 +191,15 @@ def manage_departments():
 def add_department():
     name = request.form['name']
     db.session.add(Department(name=name))
+    db.session.commit()
+    return redirect(url_for('manage_departments'))
+
+@app.route('/management/departments/edit/<int:dept_id>', methods=['POST'])
+@login_required
+@permission_required('Departman Ekle')
+def edit_department(dept_id):
+    dept = Department.query.get_or_404(dept_id)
+    dept.name = request.form['name']
     db.session.commit()
     return redirect(url_for('manage_departments'))
 
