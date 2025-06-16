@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Hoşgeldiniz {{ current_user.username }}</h2>
+<ul>
+  <li><a href="{{ url_for('manage_users') }}">Kullanıcı Yönetimi</a></li>
+  <li><a href="{{ url_for('manage_departments') }}">Departman Yönetimi</a></li>
+  <li><a href="{{ url_for('manage_permissions') }}">Yetki Tanımlama</a></li>
+  <li><a href="{{ url_for('stok_kartlari') }}">Stok Kartları</a></li>
+</ul>
+{% endblock %}
