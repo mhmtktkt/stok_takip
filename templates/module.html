@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+    <li class="breadcrumb-item active">{{ title }}</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
 <h2>{{ title }}</h2>
 <p>Bu sayfa sadece örnek olarak gösterilmektedir.</p>
