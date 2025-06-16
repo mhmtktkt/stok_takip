@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Departmanlar</h2>
+<table class="table">
+  <tr><th>ID</th><th>İsim</th><th></th></tr>
+  {% for d in departments %}
+  <tr>
+    <td>{{ d.id }}</td>
+    <td>{{ d.name }}</td>
+    <td><a class="btn btn-sm btn-danger" href="{{ url_for('delete_department', dept_id=d.id) }}">Sil</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<h3>Yeni Departman</h3>
+<form method="post" action="{{ url_for('add_department') }}">
+  <div class="mb-3"><input class="form-control" name="name" placeholder="Departman Adı"></div>
+  <button class="btn btn-primary" type="submit">Ekle</button>
+</form>
+{% endblock %}

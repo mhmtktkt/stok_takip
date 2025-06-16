@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Kullanıcılar</h2>
+<table class="table">
+  <tr><th>ID</th><th>Kullanıcı Adı</th><th>Rol</th><th>Departman</th><th></th></tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.id }}</td>
+    <td>{{ u.username }}</td>
+    <td>{{ u.role.name if u.role }}</td>
+    <td>{{ u.department.name if u.department }}</td>
+    <td><a class="btn btn-sm btn-danger" href="{{ url_for('delete_user', user_id=u.id) }}">Sil</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<h3>Yeni Kullanıcı</h3>
+<form method="post" action="{{ url_for('add_user') }}">
+  <div class="mb-3"><input class="form-control" name="username" placeholder="Kullanıcı Adı"></div>
+  <div class="mb-3"><input class="form-control" type="password" name="password" placeholder="Şifre"></div>
+  <div class="mb-3">
+    <select class="form-select" name="role_id">
+      {% for r in roles %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <select class="form-select" name="department_id">
+      <option value="">Seçiniz</option>
+      {% for d in departments %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Ekle</button>
+</form>
+{% endblock %}
