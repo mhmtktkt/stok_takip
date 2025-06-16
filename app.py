@@ -2,11 +2,19 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import shutil
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stok.db'
+# Secret key and SQLCipher password can be provided via environment variables
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret-key')
+DB_PATH = 'stok.db'
+DB_KEY = os.environ.get('DB_KEY', 'stokpass')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite+pysqlcipher:///{DB_PATH}'
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {'PRAGMA key': DB_KEY}
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -54,6 +62,28 @@ class Stock(db.Model):
     name = db.Column(db.String(128), nullable=False)
     quantity = db.Column(db.Integer, default=0)
     unit = db.Column(db.String(32))
+
+class ActionLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(64))
+    action = db.Column(db.String(32))
+    model = db.Column(db.String(64))
+    item_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+def log_action(action, model, item_id):
+    """Save CRUD actions for auditing."""
+    user = current_user.username if current_user.is_authenticated else 'system'
+    entry = ActionLog(user=user, action=action, model=model, item_id=item_id)
+    db.session.add(entry)
+    db.session.commit()
+
+def backup_database():
+    """Copy encrypted database to backups folder with timestamp."""
+    if os.path.exists(DB_PATH):
+        os.makedirs('backups', exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        shutil.copy(DB_PATH, os.path.join('backups', f'stok_{timestamp}.db'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -155,6 +185,7 @@ def add_user():
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
+    log_action('add', 'User', user.id)
     flash('Kullanıcı eklendi', 'success')
     return redirect(url_for('manage_users'))
 
@@ -169,6 +200,7 @@ def edit_user(user_id):
     user.role_id = request.form.get('role_id')
     user.department_id = request.form.get('department_id')
     db.session.commit()
+    log_action('edit', 'User', user.id)
     flash('Kullanıcı güncellendi', 'success')
     return redirect(url_for('manage_users'))
 
@@ -183,6 +215,7 @@ def delete_user(user_id):
     if user:
         db.session.delete(user)
         db.session.commit()
+        log_action('delete', 'User', user.id)
         flash('Kullanıcı silindi', 'success')
     return redirect(url_for('manage_users'))
 
@@ -198,8 +231,10 @@ def manage_departments():
 @permission_required('Departman Ekle')
 def add_department():
     name = request.form['name']
-    db.session.add(Department(name=name))
+    dept = Department(name=name)
+    db.session.add(dept)
     db.session.commit()
+    log_action('add', 'Department', dept.id)
     flash('Departman eklendi', 'success')
     return redirect(url_for('manage_departments'))
 
@@ -210,6 +245,7 @@ def edit_department(dept_id):
     dept = Department.query.get_or_404(dept_id)
     dept.name = request.form['name']
     db.session.commit()
+    log_action('edit', 'Department', dept.id)
     flash('Departman güncellendi', 'success')
     return redirect(url_for('manage_departments'))
 
@@ -221,6 +257,7 @@ def delete_department(dept_id):
     if dept:
         db.session.delete(dept)
         db.session.commit()
+        log_action('delete', 'Department', dept.id)
         flash('Departman silindi', 'success')
     return redirect(url_for('manage_departments'))
 
@@ -238,6 +275,7 @@ def manage_permissions():
             selected = request.form.getlist('menus')
             role.menus = [Menu.query.get(int(mid)) for mid in selected]
             db.session.commit()
+            log_action('edit', 'Role', role.id)
             flash('Yetkiler güncellendi', 'success')
             return redirect(url_for('manage_permissions'))
     elif request.args.get('role_id'):
@@ -264,6 +302,7 @@ def add_stock():
     )
     db.session.add(stock)
     db.session.commit()
+    log_action('add', 'Stock', stock.id)
     flash('Stok eklendi', 'success')
     return redirect(url_for('stok_kartlari'))
 
@@ -277,6 +316,7 @@ def edit_stock(stock_id):
     stock.quantity = request.form.get('quantity') or 0
     stock.unit = request.form.get('unit')
     db.session.commit()
+    log_action('edit', 'Stock', stock.id)
     flash('Stok güncellendi', 'success')
     return redirect(url_for('stok_kartlari'))
 
@@ -287,11 +327,14 @@ def delete_stock(stock_id):
     stock = Stock.query.get_or_404(stock_id)
     db.session.delete(stock)
     db.session.commit()
+    log_action('delete', 'Stock', stock.id)
     flash('Stok silindi', 'success')
     return redirect(url_for('stok_kartlari'))
 
 if __name__ == '__main__':
-    if not os.path.exists('stok.db'):
+    if not os.path.exists(DB_PATH):
         with app.app_context():
             init_db()
-    app.run(debug=True)
+    backup_database()
+    # Bind to all interfaces for intranet usage
+    app.run(host='0.0.0.0', debug=False)
