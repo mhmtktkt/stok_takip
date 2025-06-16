@@ -93,7 +93,12 @@ def init_db():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    counts = {
+        'users': User.query.count(),
+        'departments': Department.query.count(),
+        'stocks': Stock.query.count()
+    }
+    return render_template('index.html', counts=counts)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -102,7 +107,7 @@ def login():
         if user and user.check_password(request.form['password']):
             login_user(user)
             return redirect(url_for('index'))
-        flash('Invalid credentials')
+        flash('Invalid credentials', 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -122,7 +127,7 @@ def permission_required(menu_name):
                 return f(*args, **kwargs)
             menu = Menu.query.filter_by(name=menu_name).first()
             if not menu or menu not in current_user.role.menus:
-                flash('Yetkiniz yok')
+                flash('Yetkiniz yok', 'danger')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
         return decorated_function
@@ -150,6 +155,7 @@ def add_user():
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
+    flash('Kullanıcı eklendi', 'success')
     return redirect(url_for('manage_users'))
 
 @app.route('/management/users/edit/<int:user_id>', methods=['POST'])
@@ -163,6 +169,7 @@ def edit_user(user_id):
     user.role_id = request.form.get('role_id')
     user.department_id = request.form.get('department_id')
     db.session.commit()
+    flash('Kullanıcı güncellendi', 'success')
     return redirect(url_for('manage_users'))
 
 @app.route('/management/users/delete/<int:user_id>')
@@ -170,12 +177,13 @@ def edit_user(user_id):
 @permission_required('Kullanıcı Ekle')
 def delete_user(user_id):
     if current_user.id == user_id:
-        flash('Kendi hesabınızı silemezsiniz')
+        flash('Kendi hesabınızı silemezsiniz', 'danger')
         return redirect(url_for('manage_users'))
     user = User.query.get(user_id)
     if user:
         db.session.delete(user)
         db.session.commit()
+        flash('Kullanıcı silindi', 'success')
     return redirect(url_for('manage_users'))
 
 @app.route('/management/departments')
@@ -192,6 +200,7 @@ def add_department():
     name = request.form['name']
     db.session.add(Department(name=name))
     db.session.commit()
+    flash('Departman eklendi', 'success')
     return redirect(url_for('manage_departments'))
 
 @app.route('/management/departments/edit/<int:dept_id>', methods=['POST'])
@@ -201,6 +210,7 @@ def edit_department(dept_id):
     dept = Department.query.get_or_404(dept_id)
     dept.name = request.form['name']
     db.session.commit()
+    flash('Departman güncellendi', 'success')
     return redirect(url_for('manage_departments'))
 
 @app.route('/management/departments/delete/<int:dept_id>')
@@ -211,6 +221,7 @@ def delete_department(dept_id):
     if dept:
         db.session.delete(dept)
         db.session.commit()
+        flash('Departman silindi', 'success')
     return redirect(url_for('manage_departments'))
 
 @app.route('/management/permissions', methods=['GET', 'POST'])
@@ -227,6 +238,7 @@ def manage_permissions():
             selected = request.form.getlist('menus')
             role.menus = [Menu.query.get(int(mid)) for mid in selected]
             db.session.commit()
+            flash('Yetkiler güncellendi', 'success')
             return redirect(url_for('manage_permissions'))
     elif request.args.get('role_id'):
         role = Role.query.get(request.args.get('role_id'))
@@ -252,6 +264,7 @@ def add_stock():
     )
     db.session.add(stock)
     db.session.commit()
+    flash('Stok eklendi', 'success')
     return redirect(url_for('stok_kartlari'))
 
 @app.route('/kartlar/stok/edit/<int:stock_id>', methods=['POST'])
@@ -264,6 +277,7 @@ def edit_stock(stock_id):
     stock.quantity = request.form.get('quantity') or 0
     stock.unit = request.form.get('unit')
     db.session.commit()
+    flash('Stok güncellendi', 'success')
     return redirect(url_for('stok_kartlari'))
 
 @app.route('/kartlar/stok/delete/<int:stock_id>')
@@ -273,6 +287,7 @@ def delete_stock(stock_id):
     stock = Stock.query.get_or_404(stock_id)
     db.session.delete(stock)
     db.session.commit()
+    flash('Stok silindi', 'success')
     return redirect(url_for('stok_kartlari'))
 
 if __name__ == '__main__':

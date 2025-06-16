@@ -43,10 +43,10 @@
           </div>
           <form method="post" action="{{ url_for('edit_stock', stock_id=s.id) }}">
             <div class="modal-body">
-              <div class="mb-3"><label class="form-label">Kod</label><input class="form-control" name="code" value="{{ s.code }}" required></div>
-              <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" value="{{ s.name }}" required></div>
-              <div class="mb-3"><label class="form-label">Miktar</label><input class="form-control" type="number" name="quantity" value="{{ s.quantity }}"></div>
-              <div class="mb-3"><label class="form-label">Birim</label><input class="form-control" name="unit" value="{{ s.unit }}"></div>
+          <div class="mb-3"><label class="form-label">Kod</label><input class="form-control" name="code" value="{{ s.code }}" placeholder="Kod" autofocus required></div>
+          <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" value="{{ s.name }}" placeholder="İsim" required></div>
+          <div class="mb-3"><label class="form-label">Miktar</label><input class="form-control" type="number" name="quantity" value="{{ s.quantity }}" placeholder="Miktar"></div>
+          <div class="mb-3"><label class="form-label">Birim</label><input class="form-control" name="unit" value="{{ s.unit }}" placeholder="Birim"></div>
             </div>
             <div class="modal-footer"><button class="btn btn-primary" type="submit">Kaydet</button></div>
           </form>
@@ -65,10 +65,10 @@
       </div>
       <form method="post" action="{{ url_for('add_stock') }}">
         <div class="modal-body">
-          <div class="mb-3"><label class="form-label">Kod</label><input class="form-control" name="code" required></div>
-          <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" required></div>
-          <div class="mb-3"><label class="form-label">Miktar</label><input class="form-control" type="number" name="quantity"></div>
-          <div class="mb-3"><label class="form-label">Birim</label><input class="form-control" name="unit"></div>
+          <div class="mb-3"><label class="form-label">Kod</label><input class="form-control" name="code" placeholder="Kod" autofocus required></div>
+          <div class="mb-3"><label class="form-label">İsim</label><input class="form-control" name="name" placeholder="İsim" required></div>
+          <div class="mb-3"><label class="form-label">Miktar</label><input class="form-control" type="number" name="quantity" placeholder="Miktar"></div>
+          <div class="mb-3"><label class="form-label">Birim</label><input class="form-control" name="unit" placeholder="Birim"></div>
         </div>
         <div class="modal-footer"><button class="btn btn-primary" type="submit">Ekle</button></div>
       </form>
