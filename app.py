@@ -48,6 +48,13 @@ class Menu(db.Model):
     module = db.Column(db.String(64), nullable=False)
     name = db.Column(db.String(64), nullable=False)
 
+class Stock(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(64), unique=True, nullable=False)
+    name = db.Column(db.String(128), nullable=False)
+    quantity = db.Column(db.Integer, default=0)
+    unit = db.Column(db.String(32))
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -77,6 +84,10 @@ def init_db():
         admin = User(username='admin', role=Role.query.filter_by(name='Admin').first())
         admin.set_password('admin')
         db.session.add(admin)
+        db.session.commit()
+    if not Stock.query.first():
+        sample = Stock(code='STK1', name='Örnek Stok', quantity=10, unit='Adet')
+        db.session.add(sample)
         db.session.commit()
 
 @app.route('/')
@@ -204,7 +215,43 @@ def manage_permissions():
 @login_required
 @permission_required('Stok Kartları')
 def stok_kartlari():
-    return render_template('module.html', title='Stok Kartları')
+    stocks = Stock.query.all()
+    return render_template('stocks.html', stocks=stocks)
+
+@app.route('/kartlar/stok/add', methods=['POST'])
+@login_required
+@permission_required('Stok Kartları')
+def add_stock():
+    stock = Stock(
+        code=request.form['code'],
+        name=request.form['name'],
+        quantity=request.form.get('quantity') or 0,
+        unit=request.form.get('unit')
+    )
+    db.session.add(stock)
+    db.session.commit()
+    return redirect(url_for('stok_kartlari'))
+
+@app.route('/kartlar/stok/edit/<int:stock_id>', methods=['POST'])
+@login_required
+@permission_required('Stok Kartları')
+def edit_stock(stock_id):
+    stock = Stock.query.get_or_404(stock_id)
+    stock.code = request.form['code']
+    stock.name = request.form['name']
+    stock.quantity = request.form.get('quantity') or 0
+    stock.unit = request.form.get('unit')
+    db.session.commit()
+    return redirect(url_for('stok_kartlari'))
+
+@app.route('/kartlar/stok/delete/<int:stock_id>')
+@login_required
+@permission_required('Stok Kartları')
+def delete_stock(stock_id):
+    stock = Stock.query.get_or_404(stock_id)
+    db.session.delete(stock)
+    db.session.commit()
+    return redirect(url_for('stok_kartlari'))
 
 if __name__ == '__main__':
     if not os.path.exists('stok.db'):
